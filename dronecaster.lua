@@ -54,14 +54,24 @@ alert["recording_message"] = messages["empty"]
 alert["recording"] = false
 alert["recording_frame"] = 0
 
+-- FPS tracking variables for performance monitoring
+fps_frame_count = 0
+fps_time_sum = 0
+fps_last_log_time = 0
+
 done_init = false
 
 -- init & core
 --------------------------------------------------------------------------------
 function init()
-
+   print(">>> INIT: starting")
+   
+   -- Reset drones_loaded flag on script restart
+   drones_loaded = false
+   
    list_drone_names(
       function(names)
+        print(">>> INIT: list_drone_names callback started")
         drones = names
         tab.print(drones)
         
@@ -72,7 +82,9 @@ function init()
         initital_reverb_onoff = params:get('reverb')
         params:set('reverb', 1) -- 1 is OFF
         
+        print(">>> INIT: calling draw.init()")
         draw.init()
+        print(">>> INIT: draw.init() returned")
         if util.file_exists(save_path) == false then
           util.make_dir(save_path)
         end
@@ -101,6 +113,22 @@ function init()
              play_drone()
           end
         end)
+        
+        -- Graphics scene selection parameter
+        local scene_names = draw.get_scene_names()
+        params:add_option("graphics_scene", "scene", scene_names, 1)
+        params:set_action("graphics_scene", function(value)
+          draw.set_scene(scene_names[value])
+        end)
+        
+        -- Read saved params (this loads the saved scene selection)
+        params:read()
+        
+        -- Manually apply the loaded scene value since param actions don't fire on :read()
+        local saved_scene_index = params:get("graphics_scene")
+        draw.set_scene(scene_names[saved_scene_index])
+        print(">>> Scene restored: " .. scene_names[saved_scene_index])
+        
         engine.initialize(hz_default,amp_default)
         
         -- init midi params
@@ -115,7 +143,7 @@ function init()
 
    clock.run(function()
       while true do
-         clock.sleep(1/5)
+         clock.sleep(1/30)  -- 30 FPS target for smoother graphics
          redraw()
       end
    end)
@@ -133,6 +161,15 @@ end
 
 function redraw()
    if (not done_init) then return end
+   
+   -- Performance monitoring: time each frame
+   local frame_start = util.time()
+   
+   -- Initialize FPS tracking on first frame
+   if fps_last_log_time == 0 then
+      fps_last_log_time = frame_start
+   end
+   
    screen.clear()
    screen.aa(0)
    screen.font_face(0)
@@ -140,30 +177,42 @@ function redraw()
    pf = playing_frame
    rf = recording_time
    d = drones[round(params:get("drone"))]
-   h = round(params:get("hz")) .. " hz"
-   a = round(params:get("amp"), 2) .. " amp"
-   hud = d .. " " .. h .. " " .. a
+   hz_num = params:get("hz")
+   amp_num = params:get("amp")
+   h = round(hz_num) .. " hz"
+   a = round(amp_num, 2) .. " amp"
    p = playing
-   draw.birds(pf)
-   draw.wind(pf)
-   draw.lights(pf)
-   draw.uap(pf)
-   draw.landscape()
-   draw.top_menu(hud)
-   draw.clock(rf)
-   draw.play_stop(p)
-   if (alert["recording"]) then
-      alert = draw.alert_recording(alert, messages)
-   end
-   if (alert["casting"]) then
-      alert = draw.alert_casting(alert, messages)
-   end
+   
+   -- Delegate all rendering to the scene system (draw.lua handles scene switching)
+   alert = draw.render(pf, rf, d, h, a, p, alt, alert, hz_num, amp_num)
+   
    screen.update()
+   
+   -- Performance logging: average FPS over 3-second intervals
+   fps_frame_count = fps_frame_count + 1
+   fps_time_sum = fps_time_sum + (util.time() - frame_start)
+   
+   if util.time() - fps_last_log_time >= 3.0 then
+      local avg_frame_time = (fps_time_sum / fps_frame_count) * 1000  -- Convert to ms
+      local avg_fps = fps_frame_count / (util.time() - fps_last_log_time)
+      print(string.format("AVG FRAME: %.2f ms (%.1f FPS) over %d frames", 
+         avg_frame_time, avg_fps, fps_frame_count))
+      
+      -- Reset accumulators for next measurement period
+      fps_frame_count = 0
+      fps_time_sum = 0
+      fps_last_log_time = util.time()
+   end
 end
 
 -- encs & keys
 --------------------------------------------------------------------------------
 function enc(n,d)
+   -- Don't process encoders until initialization is complete
+   if not done_init then
+      return
+   end
+   
    local mult
    if n == 1 then
       params:set("drone", util.clamp(params:get("drone") + d, 1, #drones))
@@ -177,6 +226,12 @@ function enc(n,d)
 end
 
 function key(n, z)
+   -- Don't process any keys until initialization is complete
+   if not done_init then
+      print("key press ignored - waiting for init to complete")
+      return
+   end
+   
    if n == 1 and z == 1 then
       alt = true
    elseif z == 0 then
@@ -223,7 +278,12 @@ function play_drone()
    local droneIndex = params:get("drone")
    playing = true
    if droneIndex > 0 and droneIndex <= #drones then
-      engine.start(drones[droneIndex])
+      -- Only start the engine if drones are loaded (prevents errors during init)
+      if drones_loaded then
+         engine.start(drones[droneIndex])
+      else
+         print("play_drone: waiting for drones to load...")
+      end
    end
 end
 
@@ -246,12 +306,21 @@ function osc_in(path, msg)
    if path == "/add_drone" then
       print("adding drone: " .. msg[1])
    elseif path == "/drones_loaded" then 
+      print(">>> Drones loaded! Setting drones_loaded=true")
       drones_loaded=true
+      -- If user pressed play before drones finished loading, start playing now
+      if playing then
+         print(">>> Auto-starting drone since playing=true")
+         play_drone()
+      end
    end
 end
 
 
 function cleanup()
+   -- Save all parameters before exiting
+   params:write()
+   
    -- Put user's audio settings back where they were
    params:set('monitor_level', initital_monitor_level)
    params:set('reverb', initital_reverb_onoff)

@@ -199,8 +199,8 @@ function key(n, z)
 	 end
       elseif n == 3 then
 	 playing = not playing
-    if playing==nil then 
-      playing=false
+    if playing == nil then 
+      playing = false
    end
 	 alert["casting"] = true
 	 alert["casting_frame"] = 1

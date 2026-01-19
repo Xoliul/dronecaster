@@ -66,9 +66,6 @@ done_init = false
 function init()
    print(">>> INIT: starting")
    
-   -- Reset drones_loaded flag on script restart
-   drones_loaded = false
-   
    list_drone_names(
       function(names)
         print(">>> INIT: list_drone_names callback started")
@@ -254,18 +251,14 @@ function key(n, z)
 	 end
       elseif n == 3 then
 	 playing = not playing
-    if playing==nil then 
-      playing=false
-   end
+   if playing==nil then 
+     playing=false
+  end
 	 alert["casting"] = true
 	 alert["casting_frame"] = 1
 	 if playing == true then
 	    play_drone()
-       if drones_loaded then 
-   	    alert["casting_message"] = messages["start_casting"]
-       else 
-          alert["casting_message"] = messages["start_casting_after_load"]
-       end
+	    alert["casting_message"] = messages["start_casting"]
 	 else
 	    engine.stop(1)
 	    alert["casting_message"] = messages["stop_casting"]
@@ -278,12 +271,7 @@ function play_drone()
    local droneIndex = params:get("drone")
    playing = true
    if droneIndex > 0 and droneIndex <= #drones then
-      -- Only start the engine if drones are loaded (prevents errors during init)
-      if drones_loaded then
-         engine.start(drones[droneIndex])
-      else
-         print("play_drone: waiting for drones to load...")
-      end
+      engine.start(drones[droneIndex])
    end
 end
 
@@ -308,11 +296,6 @@ function osc_in(path, msg)
    elseif path == "/drones_loaded" then 
       print(">>> Drones loaded! Setting drones_loaded=true")
       drones_loaded=true
-      -- If user pressed play before drones finished loading, start playing now
-      if playing then
-         print(">>> Auto-starting drone since playing=true")
-         play_drone()
-      end
    end
 end
 

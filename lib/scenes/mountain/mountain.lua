@@ -14,7 +14,7 @@ local tower_y = 9   -- 64 - 55
 local fg_01_y = 39  -- 64 - 25
 local fg_00_y = 47  -- 64 - 17
 
-local base_path = _path.code .. "dronecaster/lib/scenes/mountain/data/"
+local base_path = _path.code .. "dronecaster/lib/scenes/mountain/assets/"
 
 -- Bitmap resources
 local gradient_file = "fog_gradient_wide.png"

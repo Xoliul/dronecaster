@@ -6,9 +6,9 @@
 
 # Installation
 
- 1. Install via maiden or clone/download the repo to `dust/code`.
- 2. Restart norns to pickup the SuperCollider Dronecaster engine.
- 3. Drone!
+1. Install via maiden or clone/download the repo to `dust/code`.
+2. Restart norns to pickup the SuperCollider Dronecaster engine.
+3. Drone!
 
 # Scene System
 
@@ -126,7 +126,7 @@ Scene crashes won't crash dronecaster:
 - Errors logged to maiden with clear messages
 - Fallback shows "SCENE ERROR" on screen
 - Sound continues playing normally
- 
+
 # Contribute
 
 We need more `SynthDefs`! Join the discussion on lines: [https://l.llllllll.co/dronecaster](https://l.llllllll.co/dronecaster)

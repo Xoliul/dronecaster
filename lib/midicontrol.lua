@@ -104,10 +104,10 @@ function midicontrol.build_midi_params()
   end)
   params:add{type = "option", id = "midi_device", name = "device",
     options = midi_devices, default = 1,
-    action = function(value) 
+    action = function(value)
       midi_device = midi.connect(value)
       midi_device.event = midicontrol.midi_event
-      end}
+    end}
   params:add{type = "number", id = "midi_in_channel", name = "channel",
     min = 1, max = 16, default = 1,
     action = function(value)
@@ -115,21 +115,21 @@ function midicontrol.build_midi_params()
     end}
   params:add{type = "option", id = "midi_amp_control", name = "amp note ctrl",
     options = {"none","velocity","key pressure"}, default = 1,
-    action = function(value) 
+    action = function(value)
       midi_amp_control = value
     end}
   params:add{type = "option", id = "midi_transport", name = "transport",
     options = {"all","ignore stop","none"}, default = 1,
-    action = function(value) 
+    action = function(value)
       midi_transport = value
-    end} 
+    end}
   params:add_number("midi_amp_cc", "amp cc", 0, 127, 76)
   params:set_action("midi_amp_cc",function(v)
-			      midi_amp_cc = v
-	end)
-	params:add_number("midi_drone_cc", "drone cc", 0, 127, 75)
+    midi_amp_cc = v
+  end)
+  params:add_number("midi_drone_cc", "drone cc", 0, 127, 75)
   params:set_action("midi_drone_cc",function(v)
-			      midi_drone_cc = v
+    midi_drone_cc = v
   end)
   params:bang()
 end

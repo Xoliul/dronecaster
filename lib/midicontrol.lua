@@ -125,11 +125,11 @@ function midicontrol.build_midi_params()
     end} 
   params:add_number("midi_amp_cc", "amp cc", 0, 127, 76)
   params:set_action("midi_amp_cc",function(v)
-			      midi_amp_cc = v
-	end)
-	params:add_number("midi_drone_cc", "drone cc", 0, 127, 75)
+            midi_amp_cc = v
+  end)
+  params:add_number("midi_drone_cc", "drone cc", 0, 127, 75)
   params:set_action("midi_drone_cc",function(v)
-			      midi_drone_cc = v
+            midi_drone_cc = v
   end)
   params:bang()
 end

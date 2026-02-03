@@ -91,7 +91,7 @@ function init()
         params:set_action("hz", hz_base_update)
         params:add{type="number",id="note",name="note",min=0,max=127,default=24,formatter=function(param) return MusicUtil.note_num_to_name(param:get(),true) end}
         params:set_action("note",function(v)
-        	      params:set("hz",math.pow(2,(v-69)/12)*440)
+                params:set("hz",math.pow(2,(v-69)/12)*440)
         end)
         
         --params:add_control("drone","drone", controlspec.new(1, #drones, "lin", 0, drone_default, "drone", 1/(#drones-1)))
@@ -193,40 +193,40 @@ function key(n, z)
       alt = true
    elseif z == 0 then
       if n == 1 then
-	 alt = false
+   alt = false
       end
       if n == 2 then
-	 recording = not recording
-	 alert["recording"] = true
-	 alert["recording_frame"] = 1
-	 if recording == true then
-	    local record_path = make_filename()
-	    recording_time = 0
-	    alert["recording_message"] = messages["start_recording"]
-	    print("recording to file " .. record_path)
-	    engine.record_start(record_path)
-	 else
-	    alert["recording_message"] = messages["stop_recording"]
-	    engine.record_stop(1)
-	 end
+   recording = not recording
+   alert["recording"] = true
+   alert["recording_frame"] = 1
+   if recording == true then
+      local record_path = make_filename()
+      recording_time = 0
+      alert["recording_message"] = messages["start_recording"]
+      print("recording to file " .. record_path)
+      engine.record_start(record_path)
+   else
+      alert["recording_message"] = messages["stop_recording"]
+      engine.record_stop(1)
+   end
       elseif n == 3 then
-	 playing = not playing
+   playing = not playing
     if playing == nil then 
       playing = false
    end
-	 alert["casting"] = true
-	 alert["casting_frame"] = 1
-	 if playing == true then
-	    play_drone()
+   alert["casting"] = true
+   alert["casting_frame"] = 1
+   if playing == true then
+      play_drone()
        if drones_loaded then 
-   	    alert["casting_message"] = messages["start_casting"]
+        alert["casting_message"] = messages["start_casting"]
        else 
           alert["casting_message"] = messages["start_casting_after_load"]
        end
-	 else
-	    engine.stop(1)
-	    alert["casting_message"] = messages["stop_casting"]
-	 end
+   else
+      engine.stop(1)
+      alert["casting_message"] = messages["stop_casting"]
+   end
       end
    end
 end
@@ -293,8 +293,8 @@ function list_drone_names(callback)
    local cb = function(text)
       local names = {}
       for line in string.gmatch(text, "/[%a%d%.%s]-%.scd") do
-	 name = string.sub(line, 2, -5)
-	 table.insert(names, name)
+   name = string.sub(line, 2, -5)
+   table.insert(names, name)
       end
       table.sort(names)
       callback(names)

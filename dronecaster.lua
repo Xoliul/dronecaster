@@ -101,6 +101,21 @@ function init()
              play_drone()
           end
         end)
+        
+        -- Graphics scene selection parameter
+        local scene_names = draw.get_scene_names()
+        params:add_option("graphics_scene", "scene", scene_names, 1)
+        params:set_action("graphics_scene", function(value)
+          draw.set_scene(scene_names[value])
+        end)
+        
+        -- Read saved params (this loads the saved scene selection)
+        params:read()
+        
+        -- Manually apply the loaded scene value since param actions don't fire on :read()
+        local saved_scene_index = params:get("graphics_scene")
+        draw.set_scene(scene_names[saved_scene_index])
+        
         engine.initialize(hz_default,amp_default)
         
         -- init midi params
@@ -140,24 +155,15 @@ function redraw()
    pf = playing_frame
    rf = recording_time
    d = drones[round(params:get("drone"))]
-   h = round(params:get("hz")) .. " hz"
-   a = round(params:get("amp"), 2) .. " amp"
-   hud = d .. " " .. h .. " " .. a
+   hz_num = params:get("hz")
+   amp_num = params:get("amp")
+   h = round(hz_num) .. " hz"
+   a = round(amp_num, 2) .. " amp"
    p = playing
-   draw.birds(pf)
-   draw.wind(pf)
-   draw.lights(pf)
-   draw.uap(pf)
-   draw.landscape()
-   draw.top_menu(hud)
-   draw.clock(rf)
-   draw.play_stop(p)
-   if (alert["recording"]) then
-      alert = draw.alert_recording(alert, messages)
-   end
-   if (alert["casting"]) then
-      alert = draw.alert_casting(alert, messages)
-   end
+   
+   -- Delegate all rendering to the scene system (draw.lua handles scene switching)
+   alert = draw.render(pf, rf, d, h, a, p, alt, alert, hz_num, amp_num)
+   
    screen.update()
 end
 

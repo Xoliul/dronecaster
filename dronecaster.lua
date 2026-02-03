@@ -108,6 +108,12 @@ function init()
         params:set_action("graphics_scene", function(value)
           draw.set_scene(scene_names[value])
         end)
+
+        -- Debug mode for verbose logging
+        params:add_binary("debug_mode", "debug", "toggle", 0)
+        params:set_action("debug_mode", function(value)
+          draw.DEBUG = value == 1
+        end)
         
         -- Read saved params (this loads the saved scene selection)
         params:read()

@@ -7,7 +7,7 @@ local mountain = {}
 mountain.name = "Mountain"
 
 -- drawing utilities (will be provided by draw.lua)
-local mlrs, mls, screen_levels
+local mlrs, mls, screen_levels, DEBUG
 
 -- Image heights and calculated Y positions for bottom alignment
 local tower_y = 9   -- 64 - 55
@@ -51,9 +51,10 @@ function mountain.init(utils)
   mlrs = utils.mlrs
   mls = utils.mls
   screen_levels = utils.screen_levels
-  
-  print("mountain: scene initialized (bitmap mode)")
-  
+  DEBUG = utils.DEBUG
+
+  if DEBUG and DEBUG() then print("mountain: scene initialized (bitmap mode)") end
+
   -- Check if bitmaps exist (will print helpful message if not)
   check_bitmaps_exist()
 end

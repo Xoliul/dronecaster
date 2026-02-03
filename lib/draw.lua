@@ -3,6 +3,9 @@
 
 local draw = {}
 
+-- debug mode (toggle via params)
+draw.DEBUG = false
+
 -- Scene system: allows multiple visual styles (classic, mountain, etc.)
 -- Each scene is a separate module with its own render function
 local scenes = {}
@@ -19,29 +22,30 @@ local alert_w = 87
 local alert_h = 12
 
 function draw.init()
-  print("draw.init: starting")
+  if draw.DEBUG then print("draw.init: starting") end
   screen_levels["o"] = 0
   screen_levels["l"] = 5
   screen_levels["m"] = 10
   screen_levels["h"] = 15
-  
-  print("draw.init: loading scenes")
+
+  if draw.DEBUG then print("draw.init: loading scenes") end
   -- load all scene modules
   draw.load_scenes()
-  print("draw.init: complete")
+  if draw.DEBUG then print("draw.init: complete") end
 end
 
 function draw.load_scenes()
-  print("draw.load_scenes: starting")
-  
+  if draw.DEBUG then print("draw.load_scenes: starting") end
+
   -- Provide utility functions to scenes for shared drawing operations
   local utils = {
     mlrs = draw.mlrs,
     mls = draw.mls,
-    screen_levels = screen_levels
+    screen_levels = screen_levels,
+    DEBUG = function() return draw.DEBUG end
   }
-  
-  print("draw.load_scenes: loading classic")
+
+  if draw.DEBUG then print("draw.load_scenes: loading classic") end
   -- Load classic scene (original dronecaster graphics)
   local success, classic = pcall(include, "lib/scenes/classic")
   if success and classic then
@@ -51,15 +55,15 @@ function draw.load_scenes()
       scenes["Classic"] = classic
       table.insert(scene_names, "Classic")
       current_scene = classic
-      print("draw: loaded Classic scene")
+      if draw.DEBUG then print("draw: loaded Classic scene") end
     else
       print("draw: ERROR initializing Classic scene: " .. tostring(init_error))
     end
   else
     print("draw: ERROR loading Classic scene file: " .. tostring(classic))
   end
-  
-  print("draw.load_scenes: loading mountain")
+
+  if draw.DEBUG then print("draw.load_scenes: loading mountain") end
   -- Load mountain scene (bitmap-optimized Mt. Zion visuals)
   local success, mountain = pcall(include, "lib/scenes/mountain/mountain")
   if success and mountain then
@@ -68,15 +72,15 @@ function draw.load_scenes()
     if init_success then
       scenes["Mountain"] = mountain
       table.insert(scene_names, "Mountain")
-      print("draw: loaded Mountain scene")
+      if draw.DEBUG then print("draw: loaded Mountain scene") end
     else
       print("draw: ERROR initializing Mountain scene: " .. tostring(init_error))
     end
   else
     print("draw: ERROR loading Mountain scene file: " .. tostring(mountain))
   end
-  
-  print("draw.load_scenes: complete, loaded " .. #scene_names .. " scenes")
+
+  if draw.DEBUG then print("draw.load_scenes: complete, loaded " .. #scene_names .. " scenes") end
 end
 
 function draw.get_scene_names()

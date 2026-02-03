@@ -139,10 +139,10 @@ function draw.render(playing_frame, recording_time, drone_name, hz, amp, playing
   draw.play_stop(playing)
   
   if (alert["recording"]) then
-    alert = draw.alert_recording(alert, _G.messages)
+    alert = draw.alert_recording(alert, messages)
   end
   if (alert["casting"]) then
-    alert = draw.alert_casting(alert, _G.messages)
+    alert = draw.alert_casting(alert, messages)
   end
   
   return alert
